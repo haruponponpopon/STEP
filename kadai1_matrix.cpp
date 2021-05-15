@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/time.h>
+#define MAX_VALUE 3 //行列の要素の最大値
 void initialize(std::vector<std::vector<int>>&matrix, int N);
 void mul(std::vector<std::vector<int>>&matrix1, std::vector<std::vector<int>>&matrix2,std::vector<std::vector<int>>&ans, int N);
 void print_equation(std::vector<std::vector<int>>&matrix1, std::vector<std::vector<int>>&matrix2,std::vector<std::vector<int>>&ans, int N);
