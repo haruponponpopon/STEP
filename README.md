@@ -10,3 +10,7 @@ rep や　using namespace std -> for文、std::cout など省略せず書く
   
 main関数内をできるだけ簡潔に記述することを意識した。  
 
+## 課題1    
+kadai1.mdをご覧ください。    
+## 課題2  
+kadai2.mdをご覧ください。  
