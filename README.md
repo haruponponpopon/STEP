@@ -12,7 +12,10 @@ main関数内をできるだけ簡潔に記述することを意識した。
 
 
 ## 課題1  
-matrix.cppをご覧ください。  
+行列を作成するコードはkadai1_matrix.cppをご覧ください。 
+考察事項はkadai1_analysis.txtに記述いたしました。  
+計測された時間はkadai1_data.xlsxです。  
+データ分析及びグラフの絵画はkadai1_graph.ipynbです。
 #### main関数  
 標準入力から行列のサイズを受け取りNとする。
 
