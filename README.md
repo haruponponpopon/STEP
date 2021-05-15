@@ -42,7 +42,7 @@ matrix1をprintし、大体真ん中(N/2と等しい)の行であった時に*�
 #### print_matrix関数  
 一行分の左のカッコをprintし、要素をprintし右のカッコをprintする。printするカッコの種類はprint_left_frame、print_right_frameより指示をもらう。  
 #### print_right_frame関数 print_left_frame関数  
-一番上の行や一番下の行であった時、"/"や"\"で全体で大きなカッコになるようにする。それ以外の時は"|"をprintする。　　
+一番上の行や一番下の行であった時、`/`や`\`で全体で大きなカッコになるようにする。それ以外の時は`|`をprintする。　　
 #### print_matrix_ans関数  
 行列積を桁数に応じてスペースをいれながらprintする関数。
 
