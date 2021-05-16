@@ -44,7 +44,7 @@ void add_hash(std::string URL, std::string web){
     hash_table[hash(URL)].push_back(new_hash);
 }
 //キューからキャッシュを一つ削除する
-void remove_hash(){
+void remove_cache(){
     bool finish = false;
     while (!finish){
         std::string remove_URL = dequeue();
@@ -73,17 +73,21 @@ void access_page(std::string URL, std::string web){
             enqueue(URL); //キューに追加
             if (hash_table[hash_value][i].overlap>1) overlap_count++;  //キャッシュに入っている時
             else {   //キャッシュに入っていない時
-                remove_hash();
+                if (cache_count==cache_size){
+                    remove_cache();
+                }else{
+                    cache_count++;
+                }
                 std::cout << URL << " was added to cache." << std::endl;
             }
             break;
         }
     }
     if (!cache){ //今までに調べたことがなかったとき
-        add_hash(URL, web);  //キャッシュが見つからなかったらハッシュテーブルに追加する
+        add_hash(URL, web);  //ハッシュテーブルに追加する
         enqueue(URL); //キューに追加
         if (cache_count==cache_size){
-            remove_hash();
+            remove_cache();
         }else{
             cache_count++;
         }
@@ -101,22 +105,14 @@ void print_hash_table(){
 }
 int main(){
     access_page("abc.com", "abc");
-    std::cout << cache_count << " " << overlap_count << std::endl;
     access_page("acb.com", "ringo");
-    std::cout << cache_count << " " << overlap_count << std::endl;
     access_page("pen.com", "pen");
-    std::cout << cache_count << " " << overlap_count << std::endl;
     access_page("pen.com", "pen");
-    std::cout << cache_count << " " << overlap_count << std::endl;
     access_page("cab.com", "book");
-    std::cout << cache_count << " " << overlap_count << std::endl;
     access_page("acb.com", "ringo");
-    std::cout << cache_count << " " << overlap_count << std::endl;
     //print_queue();
     access_page("fish.com", "fish");
-    std::cout << cache_count << " " << overlap_count << std::endl;
     access_page("abc.com", "abc");
-    std::cout << cache_count << " " << overlap_count << std::endl;
     //print_hash_table();
 }
 
