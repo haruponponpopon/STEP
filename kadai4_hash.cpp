@@ -117,6 +117,7 @@ int main(){
     std::cout << cache_count << " " << overlap_count << std::endl;
     access_page("abc.com", "abc");
     std::cout << cache_count << " " << overlap_count << std::endl;
+    //print_hash_table();
 }
 
 
