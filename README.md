@@ -9,4 +9,3 @@ macroで定数を宣言しない`constexpr size_t hash_size = 100;`とmain関数
 c++はtypedefは使われないことが多い  
 dequeueやenqueueはエラーチェックを怠らない  
 ## 大規模なプログラムの一部を書いているつもりでコードを記述する  
-homework
