@@ -1,4 +1,4 @@
-# 課題1  *と/に対応した電卓の実装
+# 課題1と2  *と/に対応した電卓の実装
 ## struct _tokens  
 文字の種類をいれる構造体   
 文字が数字だったらnumberに数字を入れて、文字の種類をtypeにいれる。typeには数字ならnumber、+ならplus、-ならminus、*ならmultiply、/ならdivideが入る。　　
