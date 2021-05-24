@@ -131,8 +131,9 @@ void evaluate_multiply_divide(std::vector<_tokens> &tokens, int &token_size){
 }
 
 
-//tokensから+と-を処理し答えを一つの数字に変換して返す
-double evaluate_plus_minus(std::vector<_tokens> &tokens, const int &token_size){
+//tokensから+答えを一つの数字に変換して返す
+double evaluate(std::vector<_tokens> &tokens, int &token_size){
+    evaluate_multiply_divide(tokens, token_size);
     double answer = 0;
     int index = 1;
     while (index < token_size){
@@ -172,8 +173,7 @@ int main(){
         int token_index = 0; //tokenのどこに値を入れるべきかを示す
         insert_plus_initialize(tokens, token_index);  //先頭に+を入れる
         tokenize(tokens, line, line_index, token_index);  //tokensに文字のタイプを入れる。数字はint型に変換する
-        evaluate_multiply_divide(tokens, token_index);
-        answer.at(i) = evaluate_plus_minus(tokens, token_index);  //tokensから+と-の処理をする
+        answer.at(i) = evaluate(tokens, token_index);  //tokensからanswerを導く
     }
     for (int i=0; i<query_num; i++){
         std::cout << answer.at(i) << std::endl;
