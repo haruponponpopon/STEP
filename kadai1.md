@@ -1,15 +1,15 @@
 # 課題1  *と/に対応した電卓の実装
 ## struct _tokens  
-文字の種類をいれる構造体 
+文字の種類をいれる構造体   
 文字が数字だったらnumberに数字を入れて、文字の種類をtypeにいれる。typeには数字ならnumber、+ならplus、-ならminus、*ならmultiply、/ならdivideが入る。　　
 
 ## main関数  
-一番最初にクエリの数を読み込む   
-その後for文でクエリの数だけ答えを計算し、それをanswerに格納する　　
-for文では一つのクエリをstring型のlineに読み込み、lineから構造体に入れていくための構造体tokensを宣言する。  
-insert_plus_initialize関数で構造体tokensの0番目に+をいれる。(のちの処理をしやすくするため)  
-tokenize関数でlineを構造体tokensに変換する。  
-evaluate関数で構造体tokensから答えとなる数字が返ってくるので、それをanswer配列に格納する。  
+一番最初にクエリの数を読み込む     
+その後for文でクエリの数だけ答えを計算し、それをanswerに格納する　  　
+for文では一つのクエリをstring型のlineに読み込み、lineから構造体に入れていくための構造体tokensを宣言する。    
+insert_plus_initialize関数で構造体tokensの0番目に+をいれる。(のちの処理をしやすくするため)    
+tokenize関数でlineを構造体tokensに変換する。    
+evaluate関数で構造体tokensから答えとなる数字が返ってくるので、それをanswer配列に格納する。    
 ## insert_plus_initialize関数  
 構造体tokensの0番目に"plus"を入れる。次に何かを入れることになったらtokensの1番目に値を入れるべきなのでtoken_indexを1増やす。  
 ## tokenize関数  
