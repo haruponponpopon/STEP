@@ -88,6 +88,19 @@ void tokenize(std::vector< _tokens> &tokens, std::string line, int &line_index, 
         }
     }
 }
+//与えられたindexの一つ前のtokensに与えられたnumberをいれて、indexとindex+1番目を削除してその後ろを詰める処理をする
+void two_shorten_tokens(std::vector<_tokens> &tokens, const int index, const double number, int &token_size){
+    tokens[index-1].number = number; //3要素が1要素になる
+    token_size -= 2;
+    tokens[index].type ="";
+    tokens[index+1].type="";
+    int new_index = index; //詰めるインデックス
+    while(new_index<token_size){
+        tokens[new_index].type = tokens[new_index+2].type;
+        tokens[new_index].number = tokens[new_index+2].number;
+        new_index++;
+    }
+}
 
 //tokensから*と/を処理しtokensを書き換える
 void evaluate_multiply_divide(std::vector<_tokens> &tokens, int &token_size){
@@ -95,16 +108,7 @@ void evaluate_multiply_divide(std::vector<_tokens> &tokens, int &token_size){
     while(index<token_size){
         if (tokens[index].type=="multiply"){
             double number = tokens[index-1].number*tokens[index+1].number;
-            tokens[index-1].number = number; //3要素が1要素になる
-            token_size -= 2;
-            tokens[index].type ="";
-            tokens[index+1].type="";
-            int new_index = index; //詰めるインデックス
-            while(new_index<token_size){
-                tokens[new_index].type = tokens[new_index+2].type;
-                tokens[new_index].number = tokens[new_index+2].number;
-                new_index++;
-            }
+            two_shorten_tokens(tokens, index, number, token_size);
             index--;
         }else if (tokens[index].type=="divide"){
             if (tokens[index+1].number==0){ //ゼロ徐算エラー
@@ -112,18 +116,7 @@ void evaluate_multiply_divide(std::vector<_tokens> &tokens, int &token_size){
                 assert(0);
             }
             double number = tokens[index-1].number/tokens[index+1].number;
-            tokens[index-1].number = number; //3要素が1要素になる
-            token_size -= 2;
-            tokens[index].type ="";
-            tokens[index].number=0;
-            tokens[index+1].type="";
-            tokens[index+1].number=0;
-            int new_index = index; //詰めるインデックス
-            while(new_index<token_size){
-                tokens[new_index].type = tokens[new_index+2].type;
-                tokens[new_index].number = tokens[new_index+2].number;
-                new_index++;
-            }
+            two_shorten_tokens(tokens, index, number, token_size);
             index--;
         }
         index++;
@@ -146,7 +139,7 @@ double evaluate(std::vector<_tokens> &tokens, int &token_size){
                 std::cout << "Invalid syntax" << std::endl;
                 assert(0);
             }
-        }else if (tokens[index].type=="plus"||tokens[index].type=="minus"||tokens[index].type=="multiply"||tokens[index].type=="divide"){
+        }else if (tokens[index].type=="plus"||tokens[index].type=="minus"){
             index++;
             continue;
         }else{
@@ -163,8 +156,8 @@ double evaluate(std::vector<_tokens> &tokens, int &token_size){
 
 int main(){
     int query_num;
-    std::cin >> query_num;
-    std::vector<double> answer(query_num);
+    std::cin >> query_num; //クエリの数
+    std::vector<double> answer(query_num); //各クエリの答えを格納する
     for (int i=0; i<query_num; i++){
         std::string line;  //標準入力
         std::cin >> line;
