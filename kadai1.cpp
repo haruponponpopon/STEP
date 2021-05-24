@@ -55,9 +55,84 @@ void read_minus(std::vector<_tokens> &tokens, int &line_index, int &token_index)
     line_index++;
 }
 
-//tokensから答えを一つの数字に変換して返す
-double evaluate(std::vector<_tokens> &tokens, const int &token_size){
+//*が入力された時に構造体tokensにその旨を入れる
+void read_multiply(std::vector<_tokens> &tokens, int &line_index, int &token_index){
+    tokens[token_index].type = "multiply";
+    token_index++;
+    line_index++;
+}
 
+//'/'が入力された時に構造体にtokensにその旨を入れる
+void read_divide(std::vector<_tokens> &tokens, int &line_index, int &token_index){
+    tokens[token_index].type = "divide";
+    token_index++;
+    line_index++;
+}
+
+//文字列lineから数字、記号に分割しtokensに入れる
+void tokenize(std::vector< _tokens> &tokens, std::string line, int &line_index, int &token_index){
+    while(line_index<(int)line.size()){
+        if (is_digit(line[line_index])){
+            read_number(tokens, line_index, token_index, line);
+        }else if (line[line_index]=='+'){
+            read_plus(tokens, line_index, token_index);
+        }else if (line[line_index]=='-'){
+            read_minus(tokens, line_index, token_index);
+        }else if (line[line_index]=='*'){
+            read_multiply(tokens, line_index, token_index);
+        }else if (line[line_index]=='/'){
+            read_divide(tokens, line_index, token_index);
+        }else{
+            std::cout << "Invalid character found: " << line[line_index] << std::endl;
+            assert(0);
+        }
+    }
+}
+
+//tokensから*と/を処理しtokensを書き換える
+void evaluate_multiply_divide(std::vector<_tokens> &tokens, int &token_size){
+    int index = 1;
+    while(index<token_size){
+        if (tokens[index].type=="multiply"){
+            double number = tokens[index-1].number*tokens[index+1].number;
+            tokens[index-1].number = number; //3要素が1要素になる
+            token_size -= 2;
+            tokens[index].type ="";
+            tokens[index+1].type="";
+            int new_index = index; //詰めるインデックス
+            while(new_index<token_size){
+                tokens[new_index].type = tokens[new_index+2].type;
+                tokens[new_index].number = tokens[new_index+2].number;
+                new_index++;
+            }
+            index--;
+        }else if (tokens[index].type=="divide"){
+            if (tokens[index+1].number==0){ //ゼロ徐算エラー
+                std::cout << "divide by zero" << std::endl;
+                assert(0);
+            }
+            double number = tokens[index-1].number/tokens[index+1].number;
+            tokens[index-1].number = number; //3要素が1要素になる
+            token_size -= 2;
+            tokens[index].type ="";
+            tokens[index].number=0;
+            tokens[index+1].type="";
+            tokens[index+1].number=0;
+            int new_index = index; //詰めるインデックス
+            while(new_index<token_size){
+                tokens[new_index].type = tokens[new_index+2].type;
+                tokens[new_index].number = tokens[new_index+2].number;
+                new_index++;
+            }
+            index--;
+        }
+        index++;
+    }
+}
+
+
+//tokensから+と-を処理し答えを一つの数字に変換して返す
+double evaluate_plus_minus(std::vector<_tokens> &tokens, const int &token_size){
     double answer = 0;
     int index = 1;
     while (index < token_size){
@@ -70,41 +145,37 @@ double evaluate(std::vector<_tokens> &tokens, const int &token_size){
                 std::cout << "Invalid syntax" << std::endl;
                 assert(0);
             }
-        }//else{
-        //     std::cout << "Invalid syntax" << std::endl;
-        //     assert(0);
-        // }
+        }else if (tokens[index].type=="plus"||tokens[index].type=="minus"||tokens[index].type=="multiply"||tokens[index].type=="divide"){
+            index++;
+            continue;
+        }else{
+            std::cout << "Invalid syntax" << std::endl;
+            assert(0);
+        }
         index++;
     }
     return answer;
 }
 
-//文字列lineから数字、記号に分割しtokensに入れる
-void tokenize(std::vector< _tokens> &tokens, std::string line, int &line_index, int &token_index){
-    while(line_index<(int)line.size()){
-        if (is_digit(line[line_index])){
-            read_number(tokens, line_index, token_index, line);
-        }else if (line[line_index]=='+'){
-            read_plus(tokens, line_index, token_index);
-        }else if (line[line_index]=='-'){
-            read_minus(tokens, line_index, token_index);
-        }else{
-            std::cout << "Invalid character found: " << line[line_index] << std::endl;
-            assert(0);
-        }
-    }
-}
 
 
 
 int main(){
-    std::string line;  //標準入力
-    std::cin >> line;
-    std::vector<_tokens> tokens(line.size()+1);
-    int line_index = 0; //lineのどこを処理しているかを示す
-    int token_index = 0; //tokenのどこに値を入れるべきかを示す
-    insert_plus_initialize(tokens, token_index);
-    tokenize(tokens, line, line_index, token_index);
-    double answer = evaluate(tokens, token_index);
-    std::cout << answer << std::endl;
+    int query_num;
+    std::cin >> query_num;
+    std::vector<double> answer(query_num);
+    for (int i=0; i<query_num; i++){
+        std::string line;  //標準入力
+        std::cin >> line;
+        std::vector<_tokens> tokens(line.size()+1);
+        int line_index = 0; //lineのどこを処理しているかを示す
+        int token_index = 0; //tokenのどこに値を入れるべきかを示す
+        insert_plus_initialize(tokens, token_index);  //先頭に+を入れる
+        tokenize(tokens, line, line_index, token_index);  //tokensに文字のタイプを入れる。数字はint型に変換する
+        evaluate_multiply_divide(tokens, token_index);
+        answer.at(i) = evaluate_plus_minus(tokens, token_index);  //tokensから+と-の処理をする
+    }
+    for (int i=0; i<query_num; i++){
+        std::cout << answer.at(i) << std::endl;
+    }
 }
