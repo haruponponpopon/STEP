@@ -5,7 +5,7 @@
 
 struct _tokens{
     std::string type;
-    int number;
+    double number;
 };
 
 //tokenの一番初めに+を入れる
@@ -22,10 +22,19 @@ bool is_digit(char c){
 
 //構造体tokens[token_index]にline[line_index]以降に入っている数字を一つ入れて、読み終わった次の各indexまでindexを更新する
 void read_number(std::vector<_tokens> &tokens, int &line_index, int &token_index, std::string line){
-    int number = 0;
+    double number = 0;
     while (line_index < (int)line.size()&&is_digit(line[line_index])){
         number = number*10+line[line_index]-'0';
         line_index++;
+    }
+    if (line_index < (int)line.size()&&line[line_index]=='.'){
+        line_index++;
+        double decimal = 0.1;
+        while (line_index < (int)line.size()&&is_digit(line[line_index])){
+            number += (line[line_index]-'0')*decimal;
+            decimal *= 0.1;
+            line_index++;
+        }
     }
     tokens[token_index].type = "number";
     tokens[token_index].number = number;
@@ -47,9 +56,9 @@ void read_minus(std::vector<_tokens> &tokens, int &line_index, int &token_index)
 }
 
 //tokensから答えを一つの数字に変換して返す
-int evaluate(std::vector<_tokens> &tokens, const int &token_size){
+double evaluate(std::vector<_tokens> &tokens, const int &token_size){
 
-    int answer = 0;
+    double answer = 0;
     int index = 1;
     while (index < token_size){
         if(tokens[index].type=="number"){
@@ -96,6 +105,6 @@ int main(){
     int token_index = 0; //tokenのどこに値を入れるべきかを示す
     insert_plus_initialize(tokens, token_index);
     tokenize(tokens, line, line_index, token_index);
-    int answer = evaluate(tokens, token_index);
+    double answer = evaluate(tokens, token_index);
     std::cout << answer << std::endl;
 }
