@@ -9,3 +9,5 @@ macroで定数を宣言しない`constexpr size_t hash_size = 100;`とmain関数
 c++はtypedefは使われないことが多い  
 dequeueやenqueueはエラーチェックを怠らない  
 ## 大規模なプログラムの一部を書いているつもりでコードを記述する  
+## つまづいてしまったところ  
+tokenize関数にlineを渡す時、constをつけて値変を防ごうとしたらconst std::string型からchar型には変換できなかった。  
