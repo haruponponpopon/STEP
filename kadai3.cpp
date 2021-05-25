@@ -28,7 +28,7 @@ bool is_digit(char c){
 }
 
 //構造体tokens[token_index]にline[line_index]以降に入っている数字を一つ入れて、読み終わった次の各indexまでindexを更新する
-void read_number(std::vector<_tokens> &tokens, int &line_index, int &token_index, std::string line){
+void read_number(std::vector<_tokens> &tokens, int &line_index, int &token_size, std::string line){
     double number = 0;
     while (line_index < (int)line.size()&&is_digit(line[line_index])){
         number = number*10+line[line_index]-'0';
@@ -43,36 +43,36 @@ void read_number(std::vector<_tokens> &tokens, int &line_index, int &token_index
             line_index++;
         }
     }
-    tokens[token_index].type = "number";
-    tokens[token_index].number = number;
-    token_index++;
+    tokens[token_size].type = "number";
+    tokens[token_size].number = number;
+    token_size++;
 }
 
 //+が入力された時に構造体tokensにその旨を入れる
-void read_plus(std::vector<_tokens> &tokens, int &line_index, int &token_index){
-    tokens[token_index].type = "plus";
-    token_index++;
+void read_plus(std::vector<_tokens> &tokens, int &line_index, int &token_size){
+    tokens[token_size].type = "plus";
+    token_size++;
     line_index++;
 }
 
 //-が入力された時に構造体tokensにその旨を入れる
-void read_minus(std::vector<_tokens> &tokens, int &line_index, int &token_index){
-    tokens[token_index].type = "minus";
-    token_index++;
+void read_minus(std::vector<_tokens> &tokens, int &line_index, int &token_size){
+    tokens[token_size].type = "minus";
+    token_size++;
     line_index++;
 }
 
 //*が入力された時に構造体tokensにその旨を入れる
-void read_multiply(std::vector<_tokens> &tokens, int &line_index, int &token_index){
-    tokens[token_index].type = "multiply";
-    token_index++;
+void read_multiply(std::vector<_tokens> &tokens, int &line_index, int &token_size){
+    tokens[token_size].type = "multiply";
+    token_size++;
     line_index++;
 }
 
 //'/'が入力された時に構造体tokensにその旨を入れる
-void read_divide(std::vector<_tokens> &tokens, int &line_index, int &token_index){
-    tokens[token_index].type = "divide";
-    token_index++;
+void read_divide(std::vector<_tokens> &tokens, int &line_index, int &token_size){
+    tokens[token_size].type = "divide";
+    token_size++;
     line_index++;
 }
 
@@ -88,29 +88,30 @@ void read_closing_parenthesis(int &end_parameter, std::vector<std::vector<int>> 
     start_point.pop_back();
     calculate_range[0].push_back(start);
     calculate_range[1].push_back(end_parameter);
-    end_parameter = 1+start;
+    end_parameter = start+1;
     line_index++;
 }
 
 //文字列lineから数字、記号に分割しtokensに入れる
-void tokenize(std::vector<std::vector<int>> &calculate_range, std::vector< _tokens> &tokens, std::string line, int &line_index, int &token_index){
+void tokenize(std::vector<std::vector<int>> &calculate_range, std::vector< _tokens> &tokens, std::string line, int &token_size){
+    int line_index = 0; //lineのどこを処理しているかを示す
     int end_parameter=0;
     std::vector<int> start_point; //開始位置をいれるスタックとする
     while(line_index<(int)line.size()){
         if (is_digit(line[line_index])){
-            read_number(tokens, line_index, token_index, line);
+            read_number(tokens, line_index, token_size, line);
             end_parameter++;
         }else if (line[line_index]=='+'){
-            read_plus(tokens, line_index, token_index);
+            read_plus(tokens, line_index, token_size);
             end_parameter++;
         }else if (line[line_index]=='-'){
-            read_minus(tokens, line_index, token_index);
+            read_minus(tokens, line_index, token_size);
             end_parameter++;
         }else if (line[line_index]=='*'){
-            read_multiply(tokens, line_index, token_index);
+            read_multiply(tokens, line_index, token_size);
             end_parameter++;
         }else if (line[line_index]=='/'){
-            read_divide(tokens, line_index, token_index);
+            read_divide(tokens, line_index, token_size);
             end_parameter++;
         }else if (line[line_index]=='('){
             read_opened_parenthesis(start_point, line_index, end_parameter);
@@ -127,8 +128,8 @@ void tokenize(std::vector<std::vector<int>> &calculate_range, std::vector< _toke
 //与えられたindexの一つ前のtokensに与えられたnumberをいれて、indexとindex+1番目を削除してその後ろを詰める処理をする
 void two_shorten_tokens(std::vector<_tokens> &tokens, const int index, const double number, int &token_size){
     tokens[index-1].number = number; //3要素が1要素になる
-    token_size -= 2; //2つ要素が減るのでサイズも1減る
-    tokens[index].type ="";　//初期化しておく
+    token_size -= 2; //2つ要素が減るのでtokensのサイズも2減る
+    tokens[index].type ="";  //初期化しておく
     tokens[index+1].type="";
     int new_index = index; //詰めるインデックス
     while(new_index<token_size){
@@ -140,12 +141,12 @@ void two_shorten_tokens(std::vector<_tokens> &tokens, const int index, const dou
 
 //tokensから*と/を処理しtokensを書き換える
 void evaluate_multiply_divide(std::vector<_tokens> &tokens, const int start, int &end, int &token_size){
-    int index = start+1;
+    int index = start+1; //tokensの今現在参照している場所
     while(index<end){
         if (tokens[index].type=="multiply"){
             double number = tokens[index-1].number*tokens[index+1].number;
             two_shorten_tokens(tokens, index, number, token_size);
-            end -= 2;
+            end -= 2; //token_sizeだけ2減らしてしまったが、endもそれに伴って減少するのでここで減らす
             index--;
         }else if (tokens[index].type=="divide"){
             if (tokens[index+1].number==0){ //ゼロ徐算エラー
@@ -190,22 +191,22 @@ double evaluate_without_parenthesis(std::vector<_tokens> &tokens, const int star
 }
 
 //tokensから()も含めた全ての処理をする
-double evaluate(std::vector<_tokens> &tokens, std::vector<std::vector<int>> &calculate_range, int &token_index){
+double evaluate(std::vector<_tokens> &tokens, std::vector<std::vector<int>> &calculate_range, int &token_size){
     double answer=0;
     for (int i=0; i<(int)calculate_range[0].size(); i++){
         int start = calculate_range[0][i];
         int end = calculate_range[1][i];
-        insert_plus_initialize(tokens, token_index, start);  //指定された場所(start)に+を入れてtokenの中身をずらす
-        end++;  //initializeでtoken_indexのみ値が更新されているので、endも更新のため一つ増やす
-        answer = evaluate_without_parenthesis(tokens, start, end, token_index); //カッコの中身を計算
+        insert_plus_initialize(tokens, token_size, start);  //指定された場所(start)に+を入れてtokenの中身をずらす
+        end++;  //initializeでtoken_index(tokensのサイズを示す)のみ値が更新されているので、endも更新のため一つ増やす
+        answer = evaluate_without_parenthesis(tokens, start, end, token_size); //カッコの中身を計算
         tokens[start].number = answer;
         tokens[start].type = "number";
         int slide_range = end-start-1; //前に詰める数
-        for (int i=start+1; i<token_index-slide_range; i++){
+        for (int i=start+1; i<token_size-slide_range; i++){
             tokens[i].number = tokens[i+slide_range].number;
             tokens[i].type = tokens[i+slide_range].type;
         }
-        token_index -= slide_range;
+        token_size -= slide_range;//tokensのサイズは詰めた分だけ減少
     }
     return answer;
 }
@@ -222,13 +223,13 @@ int main(){
         std::cin >> line;
         std::vector<_tokens> tokens(line.size()*2); //カッコが多い時大量のplusが挿入されるが最大でstring長/2+1個挿入されると考えられる。例(((3)))
         std::vector<std::vector<int>> calculate_range(2);  //()に対応、計算すべき範囲を順番に入れる配列
-        int line_index = 0; //lineのどこを処理しているかを示す
-        int token_index = 0; //tokenのどこに値を入れるべきかを示す
-        tokenize(calculate_range, tokens, line, line_index, token_index);  //tokensに文字のタイプを入れる。数字はint型に変換する
-        answer.at(i) = evaluate(tokens, calculate_range, token_index);  //tokensからanswerを導く
+        int token_size = 0; //tokensのサイズを示す。tokensの中身を増やせば増加し減らせば減少する。
+        tokenize(calculate_range, tokens, line, token_size);  //tokensに文字のタイプを入れる。数字はint型に変換する
+        answer.at(i) = evaluate(tokens, calculate_range, token_size);  //tokensからanswerを導く
     }
     for (int i=0; i<query_num; i++){
         std::cout << answer.at(i) << std::endl;
     }
+    return 0;
 }
 
