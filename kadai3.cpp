@@ -93,7 +93,7 @@ void read_closing_parenthesis(int &end_parameter, std::vector<std::vector<int>> 
 }
 
 //文字列lineから数字、記号に分割しtokensに入れる
-void tokenize(std::vector<std::vector<int>> &calculate_range, std::vector< _tokens> &tokens, std::string line, int &token_size){
+void tokenize(std::vector<std::vector<int>> &calculate_range, std::vector< _tokens> &tokens, const std::string &line, int &token_size){
     int line_index = 0; //lineのどこを処理しているかを示す
     int end_parameter=0;
     std::vector<int> start_point; //開始位置をいれるスタックとする
