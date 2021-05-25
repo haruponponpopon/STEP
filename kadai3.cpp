@@ -127,8 +127,8 @@ void tokenize(std::vector<std::vector<int>> &calculate_range, std::vector< _toke
 //与えられたindexの一つ前のtokensに与えられたnumberをいれて、indexとindex+1番目を削除してその後ろを詰める処理をする
 void two_shorten_tokens(std::vector<_tokens> &tokens, const int index, const double number, int &token_size){
     tokens[index-1].number = number; //3要素が1要素になる
-    token_size -= 2;
-    tokens[index].type ="";
+    token_size -= 2; //2つ要素が減るのでサイズも1減る
+    tokens[index].type ="";　//初期化しておく
     tokens[index+1].type="";
     int new_index = index; //詰めるインデックス
     while(new_index<token_size){
@@ -163,7 +163,7 @@ void evaluate_multiply_divide(std::vector<_tokens> &tokens, const int start, int
 
 
 //tokensから*,-,+,/の処理をして答えを一つの数字に変換して返す
-double evaluate_plus_minus(std::vector<_tokens> &tokens, const int start, int &end, int &token_size){
+double evaluate_without_parenthesis(std::vector<_tokens> &tokens, const int start, int &end, int &token_size){
     evaluate_multiply_divide(tokens, start, end, token_size);
     double answer = 0;
     int index = start+1; //start番目は+だから飛ばして大丈夫
@@ -196,11 +196,11 @@ double evaluate(std::vector<_tokens> &tokens, std::vector<std::vector<int>> &cal
         int start = calculate_range[0][i];
         int end = calculate_range[1][i];
         insert_plus_initialize(tokens, token_index, start);  //指定された場所(start)に+を入れてtokenの中身をずらす
-        end++;  
-        answer = evaluate_plus_minus(tokens, start, end, token_index);
+        end++;  //initializeでtoken_indexのみ値が更新されているので、endも更新のため一つ増やす
+        answer = evaluate_without_parenthesis(tokens, start, end, token_index); //カッコの中身を計算
         tokens[start].number = answer;
         tokens[start].type = "number";
-        int slide_range = end-start-1;
+        int slide_range = end-start-1; //前に詰める数
         for (int i=start+1; i<token_index-slide_range; i++){
             tokens[i].number = tokens[i+slide_range].number;
             tokens[i].type = tokens[i+slide_range].type;
