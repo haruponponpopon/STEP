@@ -9,7 +9,7 @@
 #include <queue>
 
 //ページをIDに変換する
-void search_ID(const std::string start_page, const std::string goal_page, 
+void search_ID(const std::string &start_page, const std::string &goal_page, 
 std::string &start_ID, std::string &goal_ID, const std::map<std::string, std::string> &pages){
     int already_searched = 0;
     for (const auto& page : pages) {
@@ -31,6 +31,31 @@ std::string &start_ID, std::string &goal_ID, const std::map<std::string, std::st
     return;
 }
 
+//探すIDが見つかるまで幅優先探索を行う。見つかったらtrueを見つからなかったらfalseを返す
+bool bfs_goal_ID(const std::string &start_ID, const std::string &goal_ID, std::map<std::string, std::string> &previous_ID,
+std::map<std::string, std::set<std::string>> &links){
+    bool found = false;
+    std::queue<std::string> que;
+    que.push(start_ID); //初期設定
+
+    /*dfs開始*/
+    while(!que.empty()){  
+        std::string current_ID = que.front();
+        que.pop();
+        if (current_ID==goal_ID) {
+            found = true;
+            break;
+        }
+        for (auto next_ID: links[current_ID]){
+            if (previous_ID[next_ID].size()) continue;
+            previous_ID[next_ID] = current_ID;
+            que.push(next_ID);
+        }
+
+    }
+    return found;
+}
+
 
 int main(){
     /*変数定義*/
@@ -40,9 +65,9 @@ int main(){
     std::map<std::string, std::string> previous_ID; //そのページの一つ前のページのID
     std::string start_page; //起点となる言葉
     std::string goal_page; //探したい言葉
-    std::queue<std::string> que;
     std::string start_ID;
     std::string goal_ID;
+    vector<std::string> route;  //startからgoalまでの道のりに出てくるPageのIDをしまう
 
 
     /*標準出力からの受け取り*/
@@ -79,19 +104,14 @@ int main(){
     
     search_ID(start_page, goal_page, start_ID, goal_ID, pages);
     // std::cout << start_ID << " " << goal_ID << std::endl;
-    que.push(start_ID);
-    while(!que.empty()){
-        std::string current_ID = que.front();
-        que.pop();
-        if (current_ID==goal_ID) break;
-        for (auto next_ID: links[current_ID]){
-            if (previous_ID[next_ID].size()) continue;
-            previous_ID[next_ID] = current_ID;
-            que.push(next_ID);
-        }
+    bool found = bfs_goal_ID(start_ID, goal_page, previous_ID, links);
 
+    if (!found){
+        std::cout << "No Connection" << std::endl;
+        return 0;
     }
 
+    
     std::string current_ID= goal_ID;
     std::cout << pages[current_ID] << " ";
     while(1){
