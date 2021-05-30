@@ -56,6 +56,26 @@ std::map<std::string, std::set<std::string>> &links){
     return found;
 }
 
+//goalからstartまで辿っていき、途中で通るpageのIDをroute配列に入れて返す。
+void reverse_route(const std::string &start_ID, const std::string &goal_ID, 
+std::map<std::string, std::string> &previous_ID, std::vector<std::string> &route){
+    std::string current_ID= goal_ID;
+    route.push_back(current_ID);
+    while(1){
+        current_ID = previous_ID[current_ID];
+        route.push_back(current_ID);
+        if (current_ID==start_ID) break;
+    }
+    return;
+}
+
+//route配列をもとに標準出力
+void print_route(std::vector<std::string> &route, std::map<std::string, std::string> &pages){
+    for (int i=(int)route.size()-1; i>=0; i--){
+        std::cout << pages[route.at(i)];
+        if (i) std::cout << "->";
+    }
+}
 
 int main(){
     /*変数定義*/
@@ -67,7 +87,7 @@ int main(){
     std::string goal_page; //探したい言葉
     std::string start_ID;
     std::string goal_ID;
-    vector<std::string> route;  //startからgoalまでの道のりに出てくるPageのIDをしまう
+    std::vector<std::string> route;  //startからgoalまでの道のりに出てくるPageのIDをしまう
 
 
     /*標準出力からの受け取り*/
@@ -104,21 +124,17 @@ int main(){
     
     search_ID(start_page, goal_page, start_ID, goal_ID, pages);
     // std::cout << start_ID << " " << goal_ID << std::endl;
-    bool found = bfs_goal_ID(start_ID, goal_page, previous_ID, links);
+    bool found = bfs_goal_ID(start_ID, goal_ID, previous_ID, links);
 
     if (!found){
         std::cout << "No Connection" << std::endl;
         return 0;
     }
 
+    reverse_route(start_ID, goal_ID, previous_ID, route);
+    print_route(route, pages);
     
-    std::string current_ID= goal_ID;
-    std::cout << pages[current_ID] << " ";
-    while(1){
-        current_ID = previous_ID[current_ID];
-        std::cout << pages[current_ID] << " ";
-        if (current_ID==start_ID) break;
-    }
+    
     return 0;
 
 }
