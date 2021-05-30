@@ -8,6 +8,32 @@
 #include <cassert>
 #include <queue>
 
+//pagesファイルを読み込む
+void read_pages(std::map<std::string, std::string> &pages){
+    // std::ifstream file("data/pages_small.txt");
+    std::ifstream file("data/pages.txt");
+    std::string data;
+    while (std::getline(file, data)) {
+        auto index = data.find('\t');
+        auto id = data.substr(0, index);
+        auto title = data.substr(index + 1, data.size() - id.size() - 1);
+        pages[id] = title;
+    }
+}
+
+//linksファイルを読み込む
+void read_links(std::map<std::string, std::set<std::string>> &links){
+    // std::ifstream file("data/links_small.txt");
+    std::ifstream file("data/links.txt");
+    std::string data;
+    while (std::getline(file, data)) {
+        auto index = data.find('\t');
+        auto from = data.substr(0, index);
+        auto to = data.substr(index + 1, data.size() - from.size() - 1);
+        links[from].insert(to);
+    }
+}
+
 //ページをIDに変換する
 void search_ID(const std::string &start_page, const std::string &goal_page, 
 std::string &start_ID, std::string &goal_ID, const std::map<std::string, std::string> &pages){
@@ -24,7 +50,7 @@ std::string &start_ID, std::string &goal_ID, const std::map<std::string, std::st
             if (already_searched==2) break;
         }
     }
-    if (already_searched!=2){
+    if (already_searched!=2){  //startかgoalの少なくとも片方が見つからなかった
         std::cout << "Invalid word" << already_searched << std::endl;
         assert(0);
     }
@@ -81,7 +107,6 @@ int main(){
     /*変数定義*/
     std::map<std::string, std::string> pages;
     std::map<std::string, std::set<std::string>> links;
-    std::map<std::string, int>used; //<ページ番号, 未使用0使用済1>
     std::map<std::string, std::string> previous_ID; //そのページの一つ前のページのID
     std::string start_page; //起点となる言葉
     std::string goal_page; //探したい言葉
@@ -94,46 +119,25 @@ int main(){
     std::cin >> start_page >> goal_page;
 
     /*ファイルの読み込み*/
-    {
-        std::ifstream file("data/pages_small.txt");
-        // std::ifstream file("data/pages.txt");
-        std::string data;
-        while (std::getline(file, data)) {
-            auto index = data.find('\t');
-            auto id = data.substr(0, index);
-            auto title = data.substr(index + 1, data.size() - id.size() - 1);
-            pages[id] = title;
-            used[id] = 0;  //usedの初期化
-        }
-    }
-    // std::cout << pages["33"] << std::endl; //ID33のページ名表示
-    {
-        std::ifstream file("data/links_small.txt");
-        // std::ifstream file("data/links.txt");
-        std::string data;
-        while (std::getline(file, data)) {
-            auto index = data.find('\t');
-            auto from = data.substr(0, index);
-            auto to = data.substr(index + 1, data.size() - from.size() - 1);
-            links[from].insert(to);
-        }
-    }
-    // for (auto x: links["33"]) std::cout << x << " "; //ID33がリンクするIDを全て表示
-    // for (auto x: links[33]) std::cout << pages[x] << " "; //ID33がリンクするIDのページ名を表示
+    read_pages(pages);
+    read_links(links);
 
-    
+    /*標準出力からのID検索*/
     search_ID(start_page, goal_page, start_ID, goal_ID, pages);
-    // std::cout << start_ID << " " << goal_ID << std::endl;
-    bool found = bfs_goal_ID(start_ID, goal_ID, previous_ID, links);
 
+    /*幅優先探索*/
+    bool found = bfs_goal_ID(start_ID, goal_ID, previous_ID, links);
+    /*見つからなかったときの処理*/
     if (!found){
         std::cout << "No Connection" << std::endl;
         return 0;
     }
 
+    /*ルートを逆戻り*/
     reverse_route(start_ID, goal_ID, previous_ID, route);
+
+    /*ルートのprint*/
     print_route(route, pages);
-    
     
     return 0;
 
