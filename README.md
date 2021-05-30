@@ -18,4 +18,4 @@ int main(){
 
 
 ## 途中で詰まったところ
-値変を防ぐためstd::map<std::string, std::set<std::string>> &linksにconstをつけて参照渡しにしようと思ったら長文のエラーが出てしまったので、constは外しました。
+値変を防ぐためstd::map<std::string, std::set<std::string>> &linksにconstをつけて参照渡しにしようと思ったらmapにはconstが付けられないようだった。
