@@ -1,5 +1,15 @@
 # 課題1  
 ## 実行方法  
+以下のようなディレクトリ構成にします。
+```
+├── data
+│   ├── links_small.txt
+│   ├── links.txt
+│   ├── pages_small.txt
+│   └── pages.txt
+|── task1.cpp
+└── task1.py
+```
 コンパイルします  
 ```
 $g++ task1.cpp -o task1
