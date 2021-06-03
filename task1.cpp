@@ -115,14 +115,14 @@ int main(){
     std::vector<std::string> route;  //startからgoalまでの道のりに出てくるPageのIDをしまう
 
 
-    /*標準出力からの受け取り*/
+    /*標準入力からの受け取り*/
     std::cin >> start_page >> goal_page;
 
     /*ファイルの読み込み*/
     read_pages(pages);
     read_links(links);
 
-    /*標準出力からのID検索*/
+    /*標準入力で受け取ったpageからのID検索*/
     search_ID(start_page, goal_page, start_ID, goal_ID, pages);
 
     /*幅優先探索*/
