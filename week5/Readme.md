@@ -29,8 +29,8 @@ int main(){
 &の後にスペースを入れることが多い。  
 ## void関数のreturnは必要な時だけ  
 void関数でreturnは不必要ならコードが冗長になるので書かない。
-## mapにconstをつけて関数の引数とする  
-findを使って実装してみたのですがうまくいかないです、、、どこを直せばよろしいのでしょうか、、、constを外すと実行できました。
+## mapにconstをつけて関数の引数としたいとき  
+findとiter->secondを組み合わせるとconstをつけてもエラーにならない。予期せぬ書き換えを防ぐためにも、積極的に使っていこう。
 ```
 #include <iostream>
 #include <map>
@@ -39,10 +39,10 @@ findを使って実装してみたのですがうまくいかないです、、�
 void search_key (const std::map<std::string, int>& fruit_map, std::string key){
 	auto iter = fruit_map.find(key);
 	if (iter == fruit_map.end()) {
+		std::cout << "not exist" << std::endl;
   		return;  // 見つからなかった
 	}
-	std::cout << fruit_map[key] << std::endl;
-
+	std::cout << iter->second<< std::endl;
 }
 
 int main(){
