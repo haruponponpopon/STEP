@@ -29,3 +29,27 @@ int main(){
 &の後にスペースを入れることが多い。  
 ## void関数のreturnは必要な時だけ  
 void関数でreturnは不必要ならコードが冗長になるので書かない。
+## mapにconstをつけて関数の引数とする  
+findを使って実装してみたのですがうまくいかないです、、、どこを直せばよろしいのでしょうか、、、constを外すと実行できました。
+```
+#include <iostream>
+#include <map>
+#include <string>
+
+void search_key (const std::map<std::string, int>& fruit_map, std::string key){
+	auto iter = fruit_map.find(key);
+	if (iter == fruit_map.end()) {
+  		return;  // 見つからなかった
+	}
+	std::cout << fruit_map[key] << std::endl;
+
+}
+
+int main(){
+	std::map<std::string, int> fruit_map;
+	fruit_map["apple"] = 1;
+	fruit_map["banana"] = 2;
+	search_key(fruit_map, "banana");
+	search_key(fruit_map, "orange");
+}
+```
