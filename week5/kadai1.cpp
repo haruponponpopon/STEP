@@ -93,46 +93,28 @@ void uncross(std::vector<int> &city_order, int city_A, int city_B){
     }
 }
 
-//(city_A1とcity_A2の距離+city_B1とcity_B2の距離)>(city_A1とcity_B1の距離+city_A2とcity_B2の距離)のときtrueを返す
-bool swap_is_appropriate(const std::vector<std::vector<double>>& coordinate, int city_A1, int city_A2, int city_B1, int city_B2){
-    if (city_distance(coordinate[0][city_A1], coordinate[1][city_A1], coordinate[0][city_A2], coordinate[1][city_A2])+
-    city_distance(coordinate[0][city_B1], coordinate[1][city_B1], coordinate[0][city_B2], coordinate[1][city_B2]) >
-    city_distance(coordinate[0][city_A1], coordinate[1][city_A1], coordinate[0][city_B1], coordinate[1][city_B1])+
-    city_distance(coordinate[0][city_A2], coordinate[1][city_A2], coordinate[0][city_B2], coordinate[1][city_B2])){
-        return true;
-    }else{
-        return false;
-    }
-}
-
 //交差している道をswapして交差をなくす
 void two_opt(std::vector<int>& city_order, const std::vector<std::vector<double>>& coordinate){
     int city_count = (int)city_order.size();
     //最後尾と先頭
     for (int i=0; i<city_count-1; i++){
-        if (cross_city(coordinate, city_order.at(0), city_order.at(city_count-1), city_order.at(i), city_order.at(i+1))
-        &&swap_is_appropriate(coordinate, city_order.at(city_count-1), city_order.at(0), city_order.at(i), city_order.at(i+1))){
+        if (cross_city(coordinate, city_order.at(0), city_order.at(city_count-1), city_order.at(i), city_order.at(i+1))){
             uncross(city_order, i+1, city_count-1);
         }
     }
     for (int i=0; i<city_count-1; i++) {
         int previous_j = -1;
         for (int j=0; j<city_count-1; j++){
-            if (cross_city(coordinate, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))&&
-          swap_is_appropriate(coordinate, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
+            if (cross_city(coordinate, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
                 uncross(city_order, i+1, j);
                 if (j!=previous_j) {
                     previous_j=j;
                     j=0;
                 }
-            }else if (cross_city(coordinate, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
-                std::cout << "OK" << std::endl;
-        
             }
         }
     }
 }
-
 
 void write_file(const std::vector<int>& ans_city_order, const std::string& file_number){
     std::string filename("output_"+file_number+".csv");
