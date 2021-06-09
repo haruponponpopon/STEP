@@ -7,9 +7,9 @@
 #include <iomanip>  //デバッグprint用
 
 //ファイルからx,y座標を読み込んでvectorに入れて返す
-std::vector<std::vector<double>> read_file(const std::string& file_name){
+std::vector<std::vector<double>> read_file(const std::string& file_number){
     std::vector<std::vector<double>> coordinate(2);
-    std::ifstream file(file_name);
+    std::ifstream file("input_"+file_number+".csv");
     if (!file) {
         std::cerr << "File not found" << std::endl;
         std::exit(1);
@@ -66,8 +66,76 @@ std::vector<int> choose_nearest_city(const std::vector<std::vector<double>>& coo
     return ans_city_order;
 }
 
-void write_file(const std::vector<int>& ans_city_order, const std::string& file_name){
-    std::string filename(file_name);
+/*交差しているか否かを判定する f(x,y) = (x1-x2)(y-y1)+(x1-x)(y1-y2)
+g(x,y) = (x1-x2)(y-y1)+(x1-x)(y1-y2) を考え、f(x,y)とg(x,y)の正負が異なるとき交差する。
+*/
+bool cross_city(const std::vector<std::vector<double>>& coordinate, const int city_A1, const int city_A2, const int city_B1, const int city_B2){
+    double judge1 = ((coordinate[0][city_A1]-coordinate[0][city_A2])*(coordinate[1][city_B1]-coordinate[1][city_A1])+
+    (coordinate[0][city_A1]-coordinate[0][city_B1])*(coordinate[1][city_A1]-coordinate[1][city_A2]))*
+    ((coordinate[0][city_A1]-coordinate[0][city_A2])*(coordinate[1][city_B2]-coordinate[1][city_A1])+
+    (coordinate[0][city_A1]-coordinate[0][city_B2])*(coordinate[1][city_A1]-coordinate[1][city_A2]));
+    double judge2 = ((coordinate[0][city_B1]-coordinate[0][city_B2])*(coordinate[1][city_A1]-coordinate[1][city_B1])+
+    (coordinate[0][city_B1]-coordinate[0][city_A1])*(coordinate[1][city_B1]-coordinate[1][city_B2]))*
+    ((coordinate[0][city_B1]-coordinate[0][city_B2])*(coordinate[1][city_A2]-coordinate[1][city_B1])+
+    (coordinate[0][city_B1]-coordinate[0][city_A2])*(coordinate[1][city_B1]-coordinate[1][city_B2]));
+    if (judge1<0&&judge2<0) return true;
+    else return false;
+}
+
+void uncross(std::vector<int> &city_order, int city_A, int city_B){
+    if (city_A>city_B){
+        std::swap(city_A, city_B);
+    }
+    while (city_A<city_B){
+        std::swap(city_order.at(city_A), city_order.at(city_B));
+        city_A++;
+        city_B--;
+    }
+}
+
+//(city_A1とcity_A2の距離+city_B1とcity_B2の距離)>(city_A1とcity_B1の距離+city_A2とcity_B2の距離)のときtrueを返す
+bool swap_is_appropriate(const std::vector<std::vector<double>>& coordinate, int city_A1, int city_A2, int city_B1, int city_B2){
+    if (city_distance(coordinate[0][city_A1], coordinate[1][city_A1], coordinate[0][city_A2], coordinate[1][city_A2])+
+    city_distance(coordinate[0][city_B1], coordinate[1][city_B1], coordinate[0][city_B2], coordinate[1][city_B2]) >
+    city_distance(coordinate[0][city_A1], coordinate[1][city_A1], coordinate[0][city_B1], coordinate[1][city_B1])+
+    city_distance(coordinate[0][city_A2], coordinate[1][city_A2], coordinate[0][city_B2], coordinate[1][city_B2])){
+        return true;
+    }else{
+        return false;
+    }
+}
+
+//交差している道をswapして交差をなくす
+void two_opt(std::vector<int>& city_order, const std::vector<std::vector<double>>& coordinate){
+    int city_count = (int)city_order.size();
+    //最後尾と先頭
+    for (int i=0; i<city_count-1; i++){
+        if (cross_city(coordinate, city_order.at(0), city_order.at(city_count-1), city_order.at(i), city_order.at(i+1))
+        &&swap_is_appropriate(coordinate, city_order.at(city_count-1), city_order.at(0), city_order.at(i), city_order.at(i+1))){
+            uncross(city_order, i+1, city_count-1);
+        }
+    }
+    for (int i=0; i<city_count-1; i++) {
+        int previous_j = -1;
+        for (int j=0; j<city_count-1; j++){
+            if (cross_city(coordinate, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))&&
+          swap_is_appropriate(coordinate, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
+                uncross(city_order, i+1, j);
+                if (j!=previous_j) {
+                    previous_j=j;
+                    j=0;
+                }
+            }else if (cross_city(coordinate, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
+                std::cout << "OK" << std::endl;
+        
+            }
+        }
+    }
+}
+
+
+void write_file(const std::vector<int>& ans_city_order, const std::string& file_number){
+    std::string filename("output_"+file_number+".csv");
     std::fstream file_out;
 
     file_out.open(filename, std::ios_base::out);
@@ -82,17 +150,19 @@ void write_file(const std::vector<int>& ans_city_order, const std::string& file_
         std::cout << "file write succeeded!" << std::endl;
     }
 }
-
-
 int main(int argc, char *argv[]){
-    if (argc!=3) {
-        std::cerr << "put two file name" << std::endl;
+    if (argc!=2) {
+        std::cerr << "put any number of 0-6" << std::endl;
         std::exit(1);
     }
+    std::string a = argv[1];
     /*ファイルの読み込み*/
     std::vector<std::vector<double>> coordinate = read_file(argv[1]);
     /*貪欲法による経路*/
-    std::vector<int> greedy_city_order = choose_nearest_city(coordinate);
+    std::vector<int> ans_city_order = choose_nearest_city(coordinate);
+
+    /*交差した道をswapして交差をなくす*/
+    two_opt(ans_city_order, coordinate);
     /*ファイルに書き込み*/
-    write_file(greedy_city_order, argv[2]);
+    write_file(ans_city_order, argv[1]);
 }
