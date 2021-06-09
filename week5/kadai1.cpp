@@ -1,10 +1,8 @@
 #include <fstream>
-// #include <sstream>
 #include <iostream>
 #include <vector>
 #include <string>
 #include <cmath>
-#include <iomanip>  //デバッグprint用
 
 //ファイルからx,y座標を読み込んでvectorに入れて返す
 std::vector<std::vector<double>> read_file(const std::string& file_number){
@@ -48,8 +46,36 @@ double calc_total_distance(const std::vector<std::vector<double>>& coordinate, c
     distance += city_distance(coordinate[0][city_order.at(0)], coordinate[1][city_order.at(0)], coordinate[0][city_order.at((int)city_order.size()-1)], coordinate[1][city_order.at((int)city_order.size()-1)]);
     return distance;
 }
+
 //貪欲法で一番近い都市を入れていく
-std::vector<int> choose_nearest_city(const std::vector<std::vector<double>>& coordinate){
+std::vector<int> choose_nearest_city1(const std::vector<std::vector<double>>& coordinate){
+    int city_count = (int)coordinate[0].size();
+    std::vector<int> used(city_count);
+    std::vector<int> city_order;
+    int current_city = 0;
+    city_order.push_back(current_city);
+    while ((int)city_order.size()<city_count){
+        used[current_city] = 1;
+        int min_city;
+        double min_city_distance = -1;
+        for (int i=0; i<city_count; i++){
+            if (used[i]==0){
+                double distance = city_distance(coordinate[0][current_city], coordinate[1][current_city], coordinate[0][i], coordinate[1][i]);
+                if (min_city_distance==-1||min_city_distance > distance){
+                    min_city_distance = distance;
+                    min_city = i;
+                }
+            }
+        }
+        city_order.push_back(min_city);
+        current_city = min_city;
+    }
+    return city_order;
+}
+
+
+//貪欲法で一番近い都市を入れていく(工夫された)
+std::vector<int> choose_nearest_city2(const std::vector<std::vector<double>>& coordinate){
     int city_count = (int)coordinate[0].size();
     std::vector<int> min_city_order;
     double min_distance=-1;
@@ -75,6 +101,7 @@ std::vector<int> choose_nearest_city(const std::vector<std::vector<double>>& coo
             current_city = min_city;
         }
         double distance = calc_total_distance(coordinate, city_order);
+        /*今までの経路よりも総距離が短くなった時*/
         if (min_distance==-1||min_distance>distance){
             min_distance = distance;
             min_city_order = city_order;
@@ -121,10 +148,12 @@ void two_opt(std::vector<int>& city_order, const std::vector<std::vector<double>
     }
     for (int i=0; i<city_count-1; i++) {
         int previous_j = -1;
+        int reset_count = 0;
         for (int j=0; j<city_count-1; j++){
             if (cross_city(coordinate, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
                 uncross(city_order, i+1, j);
-                if (j!=previous_j) {
+                if (j!=previous_j&&reset_count<city_count) {
+                    reset_count++;
                     previous_j=j;
                     j=0;
                 }
@@ -158,8 +187,7 @@ int main(int argc, char *argv[]){
     /*ファイルの読み込み*/
     std::vector<std::vector<double>> coordinate = read_file(argv[1]);
     /*貪欲法による経路*/
-    std::vector<int> ans_city_order = choose_nearest_city(coordinate);
-
+    std::vector<int> ans_city_order = choose_nearest_city1(coordinate);
     /*交差した道をswapして交差をなくす*/
     two_opt(ans_city_order, coordinate);
     /*ファイルに書き込み*/
