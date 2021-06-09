@@ -40,30 +40,47 @@ double city_distance(const double ax, const double ay, const double bx, const do
     return sqrt((ax-bx)*(ax-bx)+(ay-by)*(ay-by));
 }
 
+double calc_total_distance(const std::vector<std::vector<double>>& coordinate, const std::vector<int>& city_order){
+    double distance = 0;
+    for (int i=0; i<(int)city_order.size()-1; i++){
+        distance += city_distance(coordinate[0][city_order.at(i)], coordinate[1][city_order.at(i)], coordinate[0][city_order.at(i+1)], coordinate[1][city_order.at(i+1)]);
+    }
+    distance += city_distance(coordinate[0][city_order.at(0)], coordinate[1][city_order.at(0)], coordinate[0][city_order.at((int)city_order.size()-1)], coordinate[1][city_order.at((int)city_order.size()-1)]);
+    return distance;
+}
 //貪欲法で一番近い都市を入れていく
 std::vector<int> choose_nearest_city(const std::vector<std::vector<double>>& coordinate){
     int city_count = (int)coordinate[0].size();
-    std::vector<int> used(city_count);
-    std::vector<int> ans_city_order;
-    int current_city = 0;
-    ans_city_order.push_back(current_city);
-    while ((int)ans_city_order.size()<city_count){
-        used[current_city] = 1;
-        int min_city;
-        double min_city_distance = -1;
-        for (int i=0; i<city_count; i++){
-            if (used[i]==0){
-                double distance = city_distance(coordinate[0][current_city], coordinate[1][current_city], coordinate[0][i], coordinate[1][i]);
-                if (min_city_distance==-1||min_city_distance > distance){
-                    min_city_distance = distance;
-                    min_city = i;
+    std::vector<int> min_city_order;
+    double min_distance=-1;
+    for (int i=0; i<city_count; i++){
+        std::vector<int> used(city_count);
+        std::vector<int> city_order;
+        int current_city = i;
+        city_order.push_back(current_city);
+        while ((int)city_order.size()<city_count){
+            used[current_city] = 1;
+            int min_city;
+            double min_city_distance = -1;
+            for (int i=0; i<city_count; i++){
+                if (used[i]==0){
+                    double distance = city_distance(coordinate[0][current_city], coordinate[1][current_city], coordinate[0][i], coordinate[1][i]);
+                    if (min_city_distance==-1||min_city_distance > distance){
+                        min_city_distance = distance;
+                        min_city = i;
+                    }
                 }
             }
+            city_order.push_back(min_city);
+            current_city = min_city;
         }
-        ans_city_order.push_back(min_city);
-        current_city = min_city;
+        double distance = calc_total_distance(coordinate, city_order);
+        if (min_distance==-1||min_distance>distance){
+            min_distance = distance;
+            min_city_order = city_order;
+        }
     }
-    return ans_city_order;
+    return min_city_order;
 }
 
 /*交差しているか否かを判定する f(x,y) = (x1-x2)(y-y1)+(x1-x)(y1-y2)
