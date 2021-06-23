@@ -1,1 +1,12 @@
-[kadai1](https://docs.google.com/document/d/1aYkRgIqQD0vaGqTiVQC_nJeYk3RjrZ9RIKulBvp5ABg/edit?usp=sharing)
+[予想](https://docs.google.com/document/d/1aYkRgIqQD0vaGqTiVQC_nJeYk3RjrZ9RIKulBvp5ABg/edit?usp=sharing)  
+行列の大きさ512で計測  
+|ループ順序|1回目(sec)|2回目(sec)|3回目(sec)|平均(sec)|
+|--:|--:|--:|--:|--:|
+|i-k-j|2.33|2.30|2.24|2.29|
+|k-i-j|2.18|2.33|2.45|2.32|
+|i-j-k|2.92|2.96|2.94|2.94|
+|j-i-k|2.92|2.92|2.94|2.93|
+|k-j-i|3.18|3.22|3.14|3.18|
+|j-k-i|3.40|3.36|3.42|3.39|  
+実行時間が早い順に<i,k,j>と<k,i,j>、<i,j,k>と<j,i,k>、<j,k,i>と<k,j,i>であるという予想は当たっていた。  
+<i,k,j> < <k,i,j> << < <i,j,k> < <j,i,k> << < <k,j,i> < <j,k,i>　という予想は有意な差があるとは言えなさそうだった。  
