@@ -80,10 +80,9 @@ std::vector<int> choose_nearest_city(const std::vector<Point>& coordinates){
 }
 
 /*入れ替えたら経路が短くなるときtrueを返す*/
-bool swap_makes_shorter(const std::vector<Point>& coordinates, const std::vector<int>& city_order, const int city_A, const int city_B){
-    if (city_A+1>=(int)coordinates.size()||city_B+1>=(int)coordinates.size()) error("swap_makes_shorter: invalid");
-    double before_swap = city_distance(coordinates.at(city_order.at(city_A)), coordinates.at(city_order.at(city_A+1))) + city_distance(coordinates.at(city_order.at(city_B)), coordinates.at(city_order.at(city_B+1)));
-    double after_swap = city_distance(coordinates.at(city_order.at(city_A)), coordinates.at(city_order.at(city_B))) + city_distance(coordinates.at(city_order.at(city_A+1)), coordinates.at(city_order.at(city_B+1)));
+bool swap_makes_shorter(const std::vector<Point>& coordinates, const int city_A1, const int city_A2, const int city_B1, const int city_B2){
+    double before_swap = city_distance(coordinates.at(city_A1), coordinates.at(city_A2)) + city_distance(coordinates.at(city_B1), coordinates.at(city_B2));
+    double after_swap = city_distance(coordinates.at(city_A1), coordinates.at(city_B1)) + city_distance(coordinates.at(city_A2), coordinates.at(city_B2));
     return after_swap<before_swap;
 }
 
@@ -102,9 +101,14 @@ void two_opt(std::vector<int>& city_order, const std::vector<Point>& coordinates
     int city_count = (int)city_order.size();
     for (int i=0; i<city_count-3; i++){
         for (int j=i+2; j<city_count-1; j++){
-            if (swap_makes_shorter(coordinates, city_order, i,j)){
+            if (swap_makes_shorter(coordinates, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
                 uncross(city_order, i+1, j);
             }
+        }
+    }
+    for (int i=1; i<city_count-1; i++){
+        if (swap_makes_shorter(coordinates, city_order.at(i), city_order.at(i+1), city_order.at(city_count-1), city_order.at(0))){
+            uncross(city_order, i+1, city_count-1);
         }
     }
 }
