@@ -14,6 +14,7 @@ struct Point{
 struct node{
     struct node *next;
     int city;
+    double distance_to_next;
 };
 
 /*エラーを出力する関数*/
@@ -73,22 +74,25 @@ int nearest_city_from_zero (const std::vector<Point>& coordinates){
 }
 
 std::vector<int> insert_city (const std::vector<Point>& coordinates){
-    int goal_city = nearest_city_from_zero(coordinates);
+    double distance_one_to_two = city_distance(coordinates.at(0), coordinates.at(1));
     struct node *start = (struct node*)malloc(sizeof(struct node));
-    struct node *goal = (struct node*)malloc(sizeof(struct node));
-    start->next = goal;
+    struct node *next_start = (struct node*)malloc(sizeof(struct node));
+    start->next = next_start;
     start->city = 0;
-    goal->next = NULL;
-    goal->city = goal_city;
-    for (int i=1; i<(int)coordinates.size(); i++){
-        if (i==goal_city) continue;
+    start->distance_to_next = distance_one_to_two;
+    next_start->next = start;
+    next_start->city = 1;
+    next_start->distance_to_next = distance_one_to_two;
+    for (int i=2; i<(int)coordinates.size(); i++){
         double min_distance = DBL_MAX;
         struct node *min_node;
         struct node *current = start;
-        while (current->next){
-            double distance = city_distance(coordinates.at(current->city), coordinates.at(i))+city_distance((coordinates.at(i)), coordinates.at(current->next->city));
+        bool done = false;
+        while (!done || current!=start){
+            done = true;
+            double distance = city_distance(coordinates.at(current->city), coordinates.at(i))+city_distance((coordinates.at(i)), coordinates.at(current->next->city))-current->distance_to_next;
             if (distance<min_distance){
-                distance = min_distance;
+                min_distance = distance;
                 min_node = current;
             }
             current = current->next;
@@ -96,11 +100,15 @@ std::vector<int> insert_city (const std::vector<Point>& coordinates){
         struct node *insert_city = (struct node*)malloc(sizeof(struct node));
         insert_city->next = min_node->next;
         insert_city->city = i;
+        insert_city->distance_to_next = city_distance(coordinates.at(insert_city->next->city), coordinates.at(i));
         min_node->next = insert_city;
+        min_node->distance_to_next = city_distance(coordinates.at(min_node->city), coordinates.at(i));
     }
     struct node *current = start;
     std::vector<int> city_order;
-    while (current){
+    bool done = false;
+    while (!done||current!=start){
+        done = true;
         city_order.push_back(current->city);
         current=current->next;
     }
