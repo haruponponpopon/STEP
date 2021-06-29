@@ -4,7 +4,6 @@
 #include <iostream>
 #include <float.h>
 #include <cmath>
-using namespace std; //後で消すこと
 
 struct Point{
     double x;
@@ -43,7 +42,7 @@ std::vector<Point> read_file(const std::string& file_number){
             error("read_file:Invalid number in file"); //極端に大きな値、小さな値が入っている
         }
     }
-    std::cout << "File read succeeded..." << endl;
+    std::cout << "File read succeeded..." << std::endl;
     return coordinates;
 }
 
@@ -121,6 +120,7 @@ std::vector<int> choose_nearest_city3(const std::vector<Point>& coordinates){
     city_order.push_back(current_city);
     used.at(current_city) = 1;
     while ((int)city_order.size()<city_count-1){
+        std::cout << city_order.size() << std::endl;
         int min_city1;
         int min_city2;
         double min_city_distance = DBL_MAX;
@@ -200,7 +200,7 @@ void write_file(const std::vector<int>& city_order, const std::string& file_numb
     if (!file_out.is_open()) error("write_file:failed to open");
     file_out << "index" << std::endl;
     for (size_t i=0; i<city_order.size(); i++) file_out << city_order.at(i) << std::endl;
-    std::cout << "file write succeeded..." << endl;
+    std::cout << "file write succeeded..." << std::endl;
 }
 
 int main(int argc, char *argv[]){
