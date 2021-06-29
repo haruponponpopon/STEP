@@ -6,7 +6,6 @@
 #include <cmath>
 #include <numeric>
 #include <algorithm>
-using namespace std;
 
 struct Point{
     double x;
@@ -51,7 +50,7 @@ std::vector<Point> read_file(const std::string& file_number){
             error("read_file:Invalid number in file"); //極端に大きな値、小さな値が入っている
         }
     }
-    std::cout << "File read succeeded..." << endl;
+    std::cout << "File read succeeded..." << std::endl;
     return coordinates;
 }
 
@@ -59,7 +58,7 @@ double city_distance(const Point& p1, const Point& p2){
     return sqrt((p1.x-p2.x)*(p1.x-p2.x)+(p1.y-p2.y)*(p1.y-p2.y));
 }
 
-/*都市0から近い順に都市番号を並べる*/
+/*都市0からinstruction==2なら近い順にその他なら遠い順に都市番号を並べる*/
 std::vector<int> nearest_city_order_from_zero (const std::vector<Point>& coordinates, char instruction){
     int city_count = (int)coordinates.size();
     std::vector<double> distance_from_zero(city_count);
@@ -67,10 +66,12 @@ std::vector<int> nearest_city_order_from_zero (const std::vector<Point>& coordin
     std::vector<int> city_check_order(city_count);
     std::iota(city_check_order.begin(), city_check_order.end(),0);
     if (instruction == '2'){
+        std::cout << "city_check_order: nearest" << std::endl;
         sort(city_check_order.begin(), city_check_order.end(),[&](int x,int y) {
             return distance_from_zero[x] < distance_from_zero[y];
         });
     }else{
+        std::cout << "city_check_order: farthest" << std::endl;
         sort(city_check_order.begin(), city_check_order.end(),[&](int x,int y) {
             return distance_from_zero[x] > distance_from_zero[y];
         });
@@ -81,7 +82,7 @@ std::vector<int> nearest_city_order_from_zero (const std::vector<Point>& coordin
 /*訪れる都市をinsert法によって決める*/
 std::vector<int> insert_city (const std::vector<Point>& coordinates, const std::vector<int>& city_check_order){
     if (coordinates.size()<2) error("insert_city: number of city is too small.");
-    //初期設定
+    //初期設定(2つの都市をループさせる)
     double distance_one_to_two = city_distance(coordinates.at(city_check_order.at(0)), coordinates.at(city_check_order.at(1)));
     struct node *start = (struct node*)malloc(sizeof(struct node));
     struct node *next_start = (struct node*)malloc(sizeof(struct node));
@@ -92,7 +93,7 @@ std::vector<int> insert_city (const std::vector<Point>& coordinates, const std::
     next_start->city = city_check_order.at(1);
     next_start->distance_to_next = distance_one_to_two;
 
-    //都市2から順に線形リストに入れる
+    //未訪問の都市を順に線形リストに入れる
     for (int i=2; i<(int)coordinates.size(); i++){
         double min_distance = DBL_MAX;
         struct node *min_node;
@@ -135,7 +136,7 @@ void write_file(const std::vector<int>& city_order, const std::string& file_numb
     if (!file_out.is_open()) error("write_file:failed to open");
     file_out << "index" << std::endl;
     for (size_t i=0; i<city_order.size(); i++) file_out << city_order.at(i) << std::endl;
-    std::cout << "file write succeeded..." << endl;
+    std::cout << "file write succeeded..." << std::endl;
 }
 
 int main(int argc, char *argv[]){
@@ -145,7 +146,10 @@ int main(int argc, char *argv[]){
     std::vector<Point> coordinates = read_file(file_number);
     /*線形リストに挿入する都市の順番を決める*/
     std::vector<int> city_check_order(coordinates.size());
-    if (*argv[2] == '1') std::iota(city_check_order.begin(), city_check_order.end(), 0);
+    if (*argv[2] == '1') {
+        std::iota(city_check_order.begin(), city_check_order.end(), 0);
+        std::cout << "city_check_order: default" << std::endl;
+    }
     else city_check_order = nearest_city_order_from_zero(coordinates, *argv[2]);
     /*0番目から順にinsertしていく。*/
     std::vector<int> city_order = insert_city(coordinates, city_check_order);
