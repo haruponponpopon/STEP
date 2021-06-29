@@ -75,7 +75,79 @@ std::vector<int> choose_nearest_city(const std::vector<Point>& coordinates){
         city_order.push_back(min_city);
         current_city = min_city;
     }
-    std::cout << "greedy algorithm succeeded..." << std::endl;
+    std::cout << "greedy1 algorithm succeeded..." << std::endl;
+    return city_order;
+}
+
+/*貪欲法で1番近い2都市の一番近い都市を入れていく*/
+std::vector<int> choose_nearest_city2(const std::vector<Point>& coordinates){
+    size_t city_count = coordinates.size();
+    std::vector<int> used(city_count);
+    std::vector<int> city_order;
+    int current_city = 0;
+    int next_city;
+    city_order.push_back(current_city);
+    used.at(current_city) = 1;
+    while (city_order.size()<city_count-1){
+        used.at(current_city) = 1;
+        int min_city;
+        double min_city_distance = DBL_MAX;
+        for (int i=0; i<(int)city_count; i++){
+            for (int j=0; j<(int)city_count; j++){
+                if (!used.at(i)&&!used.at(j)&&i!=j){
+                    double distance = city_distance(coordinates.at(current_city), coordinates.at(i))+city_distance(coordinates.at(i), coordinates.at(j));
+                    if (min_city_distance>distance){
+                        min_city_distance = distance;
+                        min_city = i;
+                        next_city = j;
+                    }
+                }
+            }
+        }
+        city_order.push_back(min_city);
+        current_city = min_city;
+    }
+    city_order.push_back(next_city);
+    std::cout << "greedy2 algorithm succeeded..." << std::endl;
+    return city_order;
+}
+
+/*貪欲法で1番近い2都市を両方入れていく*/
+std::vector<int> choose_nearest_city3(const std::vector<Point>& coordinates){
+    int city_count = (int)coordinates.size();
+    std::vector<int> used(city_count);
+    std::vector<int> city_order;
+    int current_city = 0;
+    city_order.push_back(current_city);
+    used.at(current_city) = 1;
+    while ((int)city_order.size()<city_count-1){
+        int min_city1;
+        int min_city2;
+        double min_city_distance = DBL_MAX;
+        for (int i=0; i<city_count; i++){
+            for (int j=0; j<city_count; j++){
+                if (!used.at(i)&&!used.at(j)&&i!=j){
+                    double distance = city_distance(coordinates.at(current_city), coordinates.at(i))+city_distance(coordinates.at(i), coordinates.at(j));
+                    if (min_city_distance>distance){
+                        min_city_distance = distance;
+                        min_city1 = i;
+                        min_city2 = j;
+                    }
+                }
+            }
+        }
+        city_order.push_back(min_city1);
+        city_order.push_back(min_city2);
+        used.at(min_city1) = 1;
+        used.at(min_city2) = 1;
+        current_city = min_city2;
+    }
+    if (!(city_count%2)){
+        for (int i=0; i<city_count; i++){
+            if (!used.at(i)) city_order.push_back(i);
+        }
+    }
+    std::cout << "greedy3 algorithm succeeded..." << std::endl;
     return city_order;
 }
 
@@ -86,7 +158,7 @@ bool swap_makes_shorter(const std::vector<Point>& coordinates, const int city_A1
     return after_swap<before_swap;
 }
 
-/*city_A<city_B*/
+/*city_A<city_Bの時のみクロスを解除する。それ以外ならエラー*/
 void uncross(std::vector<int> &city_order, int city_A, int city_B){
     if (city_B<=city_A) error ("uncross: invalid");
     while (city_A<city_B){
@@ -99,16 +171,22 @@ void uncross(std::vector<int> &city_order, int city_A, int city_B){
 /*交差している道をswapして交差をなくす*/
 void two_opt(std::vector<int>& city_order, const std::vector<Point>& coordinates){
     int city_count = (int)city_order.size();
-    for (int i=0; i<city_count-3; i++){
-        for (int j=i+2; j<city_count-1; j++){
-            if (swap_makes_shorter(coordinates, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
-                uncross(city_order, i+1, j);
+    int count = 1;
+    while (count){
+        count=0;
+        for (int i=0; i<city_count-3; i++){
+            for (int j=i+2; j<city_count-1; j++){
+                if (swap_makes_shorter(coordinates, city_order.at(i), city_order.at(i+1), city_order.at(j), city_order.at(j+1))){
+                    uncross(city_order, i+1, j);
+                    count++;
+                }
             }
         }
-    }
-    for (int i=1; i<city_count-1; i++){
-        if (swap_makes_shorter(coordinates, city_order.at(i), city_order.at(i+1), city_order.at(city_count-1), city_order.at(0))){
-            uncross(city_order, i+1, city_count-1);
+        for (int i=1; i<city_count-1; i++){
+            if (swap_makes_shorter(coordinates, city_order.at(i), city_order.at(i+1), city_order.at(city_count-1), city_order.at(0))){
+                uncross(city_order, i+1, city_count-1);
+                count++;
+            }
         }
     }
 }
@@ -126,12 +204,16 @@ void write_file(const std::vector<int>& city_order, const std::string& file_numb
 }
 
 int main(int argc, char *argv[]){
-    if (argc!=2) error("put any numer");
+    if (argc!=3) error("argv: put any numer and instruction");
     std::string file_number = argv[1];
     /*ファイルの読み込み*/
     std::vector<Point> coordinates = read_file(file_number);
     /*貪欲法による経路*/
-    std::vector<int> city_order = choose_nearest_city(coordinates);
+    std::vector<int> city_order(coordinates.size());
+    if (*argv[2]=='1') city_order = choose_nearest_city(coordinates);
+    else if (*argv[2]=='2') city_order = choose_nearest_city2(coordinates);
+    else if (*argv[2]=='3') city_order = choose_nearest_city3(coordinates);
+    else error("argv: instruction is invalid");
     /*交差した道をswapして交差をなくす*/
     two_opt(city_order, coordinates);
     /*ファイルに書き込み*/
